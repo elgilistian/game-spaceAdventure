@@ -16,7 +16,7 @@
 
         canvas {
             display: block;
-            background: radial-gradient(circle at center, #1e3c72 0%, #2a5298 100%); /* Latar belakang biru luar angkasa */
+            background: #111;
             margin: 0 auto;
             border: 2px solid #fff;
         }
@@ -26,25 +26,12 @@
             top: 10px;
             left: 10px;
             font-size: 1.2rem;
-            background-color: #333;
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: #fc5c7d;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 2px 2px 5px #000;
-            letter-spacing: 2px;
-            transition: transform 0.3s;
-            cursor: pointer;
-        }
-
-        .header:hover {
-            transform: scale(1.05);
-            background-color: #444;
+            color: #fff;
         }
 
         .scoreboard {
             position: absolute;
-            top: 60px;
+            top: 40px;
             left: 10px;
             font-size: 1.5rem;
             color: #fff;
@@ -149,14 +136,14 @@
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
-    <div class="header">Dump Light Escape - By Elgi</div>
+    <div class="header">Space Adventure - By Elgi</div>
     <div class="scoreboard">Score: 0</div>
     <div class="game-over" id="gameOver">
         <h1>Game Over!</h1>
         <button onclick="restartGame()">Play Again</button>
     </div>
     <div class="play-button" id="playButton">
-        <h1>Game Html: </h1>
+        <h1>Space Adventure</h1>
         <h2>By Elgi</h2>
         <p>Tujuan permainan: Hindari rintangan yang jatuh!</p>
         <button onclick="startGame()">Start</button>
@@ -177,19 +164,12 @@
         let score = 0;
         let gameOver = false;
         let gameStarted = false;
-        let spaceship = { x: canvas.width / 2 - 25, y: canvas.height - 250, width: 80, height: 45, speed: 45 };
+        let spaceship = { x: canvas.width / 2 - 25, y: canvas.height - 250, width: 50, height: 25, speed: 30 }; // Ukuran pesawat diperkecil, kecepatan ditingkatkan
         let meteors = [];
         let meteorSpeed = 5;
-        let meteorInterval = 1500;
+        let meteorInterval = 1500; // Mempercepat frekuensi munculnya meteor
         let lastMeteorTime = Date.now();
-        let difficultyIncrementScore = 100;
-
-        // Load spaceship and meteor images
-        const spaceshipImage = new Image();
-        spaceshipImage.src = 'https://cdn-icons-png.flaticon.com/512/2907/2907313.png'; // Icon pesawat yang lebih terang dan estetik
-
-        const meteorImage = new Image();
-        meteorImage.src = 'https://cdn-icons-png.flaticon.com/512/702/702797.png'; // Icon meteor yang lebih terang dan modern
+        let difficultyIncrementScore = 100; // Skor interval untuk meningkatkan kesulitan
 
         // Event listeners for desktop controls
         document.addEventListener('keydown', (e) => {
@@ -215,12 +195,12 @@
         });
 
         function createMeteor() {
-            const size = Math.random() * (50 + score / 25) + 20; // Ukuran meteor bervariasi lebih besar
+            const size = Math.random() * (30 + score / 50) + 15; // Ukuran meteor bervariasi lebih kecil
             meteors.push({
                 x: Math.random() * (canvas.width - size),
                 y: -size,
                 size: size,
-                speed: meteorSpeed + Math.random() * 2,
+                speed: meteorSpeed + Math.random() * 2, // Kecepatan meteor bervariasi
             });
         }
 
@@ -231,7 +211,7 @@
 
             // Update meteors
             for (let i = meteors.length - 1; i >= 0; i--) {
-                meteors[i].y += meteors[i].speed;
+                meteors[i].y += meteors[i].speed; // Kecepatan meteor yang berbeda
 
                 if (meteors[i].y > canvas.height) {
                     meteors.splice(i, 1);
@@ -248,9 +228,9 @@
 
             // Increase difficulty dynamically
             if (score >= difficultyIncrementScore) {
-                meteorSpeed += 1;
-                meteorInterval = Math.max(500, meteorInterval - 100);
-                difficultyIncrementScore += 100;
+                meteorSpeed += 1; // Tingkatkan kecepatan meteor
+                meteorInterval = Math.max(500, meteorInterval - 100); // Kurangi interval meteor
+                difficultyIncrementScore += 100; // Ubah batas kenaikan kesulitan
             }
 
             if (Date.now() - lastMeteorTime > meteorInterval) {
@@ -260,13 +240,14 @@
 
             // Render
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00f';
+            ctx.fillRect(spaceship.x, spaceship.y, spaceship.width, spaceship.height);
 
-            // Draw spaceship
-            ctx.drawImage(spaceshipImage, spaceship.x, spaceship.y, spaceship.width, spaceship.height);
-
-            // Draw meteors
+            ctx.fillStyle = '#f00';
             for (const meteor of meteors) {
-                ctx.drawImage(meteorImage, meteor.x, meteor.y, meteor.size, meteor.size);
+                ctx.beginPath();
+                ctx.arc(meteor.x + meteor.size / 2, meteor.y + meteor.size / 2, meteor.size / 2, 0, Math.PI * 2);
+                ctx.fill();
             }
 
             document.querySelector('.scoreboard').innerText = `Score: ${score}`;
@@ -275,43 +256,32 @@
                 requestAnimationFrame(updateGame);
             } else {
                 document.getElementById('gameOver').style.display = 'block';
-                document.getElementById('mobileControls').style.display = 'none';
             }
         }
 
         function restartGame() {
             score = 0;
             gameOver = false;
-            gameStarted = false;
             meteorSpeed = 5;
             meteorInterval = 1500;
-            difficultyIncrementScore = 100;
+            lastMeteorTime = Date.now();
             meteors = [];
-            spaceship.x = canvas.width / 2 - spaceship.width / 2;
+            spaceship.x = canvas.width / 2 - 25;
             spaceship.y = canvas.height - 250;
             document.getElementById('gameOver').style.display = 'none';
-            document.getElementById('playButton').style.display = 'block';
+            updateGame();
         }
 
         function startGame() {
             gameStarted = true;
             document.getElementById('playButton').style.display = 'none';
-            document.getElementById('mobileControls').style.display = 'flex';
+            document.getElementById('mobileControls').style.display = 'flex'; // Show controls
             updateGame();
         }
 
-        // Initial setup for start screen
+        // Initial setup
         document.getElementById('playButton').style.display = 'block';
-        document.getElementById('mobileControls').style.display = 'none';
-
-        // Adjust canvas size on window resize
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            spaceship.x = canvas.width / 2 - spaceship.width / 2;
-            spaceship.y = canvas.height - 250;
-        });
+        document.getElementById('mobileControls').style.display = 'none'; // Hide controls initially
     </script>
 </body>
 </html>
- 
